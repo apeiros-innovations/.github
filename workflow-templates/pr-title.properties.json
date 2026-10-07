@@ -1,0 +1,5 @@
+{
+  "name": "Apeiros PR title",
+  "description": "Validate Conventional Commit PR titles using the shared Common workflow.",
+  "iconName": "octicon git-pull-request"
+}
