@@ -24,4 +24,4 @@ concurrency:
 jobs:
   title:
     name: PR title
-    uses: apeiros-innovations/common/.github/workflows/pr-title-check.yaml@main  # zizmor: ignore[unpinned-uses] -- Follow reviewed organization workflow updates.
+    uses: apeiros-innovations/common/.github/workflows/pr-title-check.yaml@590588b1f1b4304c1908264948fae50e46e78f89 # v1.0.1
