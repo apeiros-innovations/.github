@@ -11,7 +11,35 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   validate:
-    name: Check documentation and workflows
+    name: Check documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check Markdown
+        uses: DavidAnson/markdownlint-cli2-action@696eb3f2509270d7b882d2aa68347bc676e7af34 # v25.0.0
+        with:
+          globs: '**/*.md'
+  status:
+    name: Build Success
+    if: ${{ always() }}
+    needs: ["validate", "workflow-quality"]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      statuses: read
+    steps:
+      - name: Require every selected check
+        uses: apeiros-innovations/common/.github/actions/ci-gate@f2ae1e75574ce6cd0863c99a3e256a313fc3c4c3 # v1.0.0
+        with:
+          needs: ${{ toJSON(needs) }}
+          expected: >-
+            {"validate": true, "workflow-quality": true}
+  workflow-quality:
+    name: Workflow quality
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -22,29 +50,17 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Check Markdown
-        uses: DavidAnson/markdownlint-cli2-action@696eb3f2509270d7b882d2aa68347bc676e7af34 # v25.0.0
-        with:
-          globs: '**/*.md'
       - name: Check workflow syntax
         uses: reviewdog/action-actionlint/dockerless@48e36f54d8da326b83ab061aee2cc5e01b5ca46f # v1.80.6
         with:
           reporter: github-check
           filter_mode: nofilter
           fail_level: any
-  status:
-    name: Build Success
-    if: ${{ always() }}
-    needs: ["validate"]
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: read
-      statuses: read
-    steps:
-      - name: Require every selected check
-        uses: apeiros-innovations/common/.github/actions/ci-gate@cb121e644708aa003e4411492ed6ff33dbbbb68d # main
+      - name: Audit workflow security
+        uses: zizmorcore/zizmor-action@53290badfa369cb0bf7ad16342cb62c2fa47ac7b # v0.8.0
         with:
-          needs: ${{ toJSON(needs) }}
-          expected: >-
-            {"validate": true}
+          # renovate: datasource=github-releases depName=zizmorcore/zizmor
+          version: 1.31.1
+          inputs: .github/workflows
+          advanced-security: false
+          annotations: true
