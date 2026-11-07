@@ -50,7 +50,28 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
+      # Compare event commits locally; manual/scheduled runs retain full validation.
+      # https://github.com/dorny/paths-filter#supported-workflows
+      - name: Detect workflow changes
+        id: actionlint-changes
+        if: >-
+          contains(fromJSON('["pull_request", "push", "merge_group"]'), github.event_name) && (github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before) != '' && (github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before) != '0000000000000000000000000000000000000000'
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          token: ''
+          base: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+          ref: ${{ github.sha }}
+          filters: |
+            workflows:
+              - '.github/workflows/**'
+              - '**/action.{yaml,yml}'
+              - '.github/actionlint.{yaml,yml}'
+              - '.shellcheckrc'
+              - '.mise/**'
+              - '.miserc.toml'
       - name: Check workflow syntax
+        if: steps.actionlint-changes.outputs.workflows != 'false'
         uses: reviewdog/action-actionlint/dockerless@7abf25e1607ec65838b73d0484ff31f8e9499d80 # v1.81.2
         with:
           reporter: github-check
