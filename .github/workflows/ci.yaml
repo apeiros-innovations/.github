@@ -10,7 +10,28 @@ concurrency:
   group: ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
+  scope:
+    name: Select affected checks
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      selected: ${{ steps.select.outputs.selected }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: select
+        # Review pin; replace with the published Common release before merging.
+        uses: apeiros-innovations/common/.github/actions/select-checks@8ec97ac7c6336952d951a95a49771aec551a8291
+        with:
+          policy: .github/ci-impact/ci.json
+
   validate:
+    if: ${{ needs.scope.result == 'success' && fromJSON(needs.scope.outputs.selected || '{}')['validate'] }}
+    needs: ["scope"]
     name: Check documentation
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -25,7 +46,7 @@ jobs:
   status:
     name: Build Success
     if: ${{ always() }}
-    needs: ["validate", "workflow-quality"]
+    needs: ["scope", "validate", "workflow-quality"]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -37,8 +58,10 @@ jobs:
         with:
           needs: ${{ toJSON(needs) }}
           expected: >-
-            {"validate": true, "workflow-quality": true}
+            {"scope": true, "validate": "${{ fromJSON(needs.scope.outputs.selected || '{}')['validate'] }}", "workflow-quality": "${{ fromJSON(needs.scope.outputs.selected || '{}')['workflow-quality'] }}"}
   workflow-quality:
+    if: ${{ needs.scope.result == 'success' && fromJSON(needs.scope.outputs.selected || '{}')['workflow-quality'] }}
+    needs: ["scope"]
     name: Workflow quality
     runs-on: ubuntu-latest
     timeout-minutes: 10
