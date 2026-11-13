@@ -1,0 +1,51 @@
+---
+validate:
+  - "**/*.md"
+  - .markdownlint-cli2.yaml
+  - .github/workflows/ci.yaml
+  - .github/workflows/tools.yaml
+  - ".github/actions/**"
+  - ".github/paths/**"
+  - .mise/config.toml
+  - .mise/mise.lock
+  - .mise/config.ci.toml
+  - .mise/mise.ci.lock
+  - .miserc.toml
+workflow-quality:
+  - ".github/workflows/**"
+  - ".github/actions/**"
+  - .github/actionlint.yaml
+  - .github/actionlint.yml
+  - .github/zizmor.yaml
+  - .shellcheckrc
+  - .github/workflows/ci.yaml
+  - .github/workflows/tools.yaml
+  - ".github/**"
+  - ".github/paths/**"
+  - .mise/config.toml
+  - .mise/mise.lock
+  - .mise/config.ci.toml
+  - .mise/mise.ci.lock
+  - .miserc.toml
+unclassified:
+  - "**"
+  - "!**/*.md"
+  - "!.github/**"
+  - "!.github/actionlint.yaml"
+  - "!.github/actionlint.yml"
+  - "!.github/actions/**"
+  - "!.github/paths/**"
+  - "!.github/renovate.json"
+  - "!.github/workflows/**"
+  - "!.github/workflows/ci.yaml"
+  - "!.github/workflows/tools.yaml"
+  - "!.github/zizmor.yaml"
+  - "!.markdownlint-cli2.yaml"
+  - "!.mise/config.ci.toml"
+  - "!.mise/config.toml"
+  - "!.mise/mise.ci.lock"
+  - "!.mise/mise.lock"
+  - "!.miserc.toml"
+  - "!.renovaterc.json5"
+  - "!.shellcheckrc"
+  - "!renovate.json"
