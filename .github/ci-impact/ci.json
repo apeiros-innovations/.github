@@ -32,7 +32,8 @@
         ".github/zizmor.yaml",
         ".shellcheckrc",
         ".github/workflows/ci.yaml",
-        ".github/workflows/tools.yaml"
+        ".github/workflows/tools.yaml",
+        ".github/**"
       ],
       "tools": [
         "python",
